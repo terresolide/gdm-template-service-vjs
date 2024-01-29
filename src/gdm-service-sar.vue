@@ -39,7 +39,7 @@
       <formater-search-box  header-icon-class="fa fa-cogs" :color="color"
                open-icon-class="fa fa-caret-right" :title="$t('compute_parameters')" :deployed="true" type="empty" >
             LES PARAMÈTRES DE CALCULS
-            </formater-search-box>
+      </formater-search-box>
     </div>
     <div class="column-right">
       <!-- la carte -->
@@ -47,13 +47,14 @@
       <!-- les actions à exécuter -->
       <actions-component></actions-component>
       <!-- la liste des images -->
-      <images-list></images-list>
+      <images-list :height="dimensions.imagesHeight" @scroll="imagesScrollChange"></images-list>
       
     </div>
   </div>
 </div>
 </template>
 <script>
+import animateScrollTo from 'animated-scroll-to'
 import { FormaterSearchBox} from 'formater-commons-components-vjs'
 import ImagesSearch from './gdm-service-sar/images-search.vue'
 import MapComponent from './gdm-service-sar/map-component.vue'
@@ -100,23 +101,80 @@ export default {
         isMaxScrolled: false,
         isImagesScrolled: false
        },
-       displayedImages: []
+       displayedImages: [],
+       resizeListener: null,
+       scrollListener: null
     }
   },
   created () {
     // initialise la langue
-    console.log(this.service)
     this.$i18n.locale = this.lang
+    // les listeners globaux
+    this.resizeListener = this.resize.bind(this)
+    window.addEventListener('resize', this.resizeListener)
+    this.scrollListener = this.scrollChange.bind(this)
+    window.addEventListener('scroll', this.scrollListener)
+
+  },
+  mounted () {
+    this.initSize()
+    this.resize()
+  },
+  destroyed () {
+    window.removeEventListener('resize', this.resizeListener)
+    this.resizeListener = null
+    window.removeEventListener('scroll', this.scrollListener)
+    this.scrollListener = null
   },
   methods: {
     goToTop() {
-      
+      var node = document.querySelector('#app')
+      animateScrollTo(node, {speed: 2000})
+      this.goToTopImages()
+
+    },
+    goToTopImages () {
+      var nodeImages = document.querySelector('.images-container')
+      if (nodeImages) {
+          animateScrollTo([0, 0], {speed: 500, elementToScroll: nodeImages})
+      }
+
+    },
+    imagesScrollChange (e) {
+        this.$set(this.dimensions, 'isImagesScrolled', (e.target.scrollTop > 10))
+    },
+    initSize () {
+        this.dimensions.defaultMapHeight = this.$el.querySelector('.formater-search-box:nth-child(3)').offsetHeight - 50
+        this.dimensions.mapHeight = this.dimensions.defaultMapHeight
+    },
+    resize () {
+      this.dimensions.windowHeight = window.innerHeight
+      var h = 70
+      var node = null
+      if (this.$el && this.$el.querySelector) {
+        node = this.$el.querySelector('.form-images')
+      }
+      if (node) {
+        h = node.clientHeight + 5
+      }
+      this.$set(this.dimensions, 'imagesHeight', window.innerHeight - h)
+    },
+    scrollChange () {
+        var scrollMaxY = window.scrollMaxY || (document.documentElement.scrollHeight - document.documentElement.clientHeight)
+        this.$set(
+          this.dimensions,
+          'isScrolled',
+           window.scrollY > 150)
+        this.$set(
+          this.dimensions,
+          'isMaxScrolled',
+          scrollMaxY - window.scrollY < 5,
+        )
     },
     scrollTopImages () {
       
     }
   }
-  
 }
 </script>
 
