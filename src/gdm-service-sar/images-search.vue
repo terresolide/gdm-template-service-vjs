@@ -138,7 +138,7 @@ export default {
 	        polarisation: 'Ascendant',
 	        product: 'SLC',
 	        platform: '',
-	        sensorMode: 'IW',
+	        sensor: 'IW',
 	        polarizationType: 'vv',
 	        polarizations: ['vv'],
 	        orbitDirection: '',

@@ -60,6 +60,14 @@ export default {
       type: Array,
       default: () => []
     },
+    displayedIntersection: {
+      type: Object,
+      default: null
+    },
+    displayedGroups: {
+      type: Array,
+      default: () => []
+    },
     height: {
       type: Number,
       default: 500
@@ -67,6 +75,10 @@ export default {
     removedImages: {
       type: Array,
       default: () => []
+    },
+    showRemovedGeometry: {
+      type: Boolean,
+      default: false
     }
   },
 	components: {
@@ -80,6 +92,7 @@ export default {
   },
   data () {
     return {
+      center: [47.413220, -1.219482],
       drawControl: null,
       drawnBbox: null,
       layerControl: null,
@@ -88,6 +101,7 @@ export default {
       mousePosition: null,
       unwMarker: null,
       unwMarkerStart: null,
+      zoom: 2
         
 
     }
@@ -106,6 +120,25 @@ export default {
 
   },
   methods: {
+    addUnwMarker (event) {
+        if (!this.selectedOrbit.number) {
+          this.unwMarker = null
+          return
+        }
+        if (!this.useSeed || !this.expertMode) {
+          this.unwMarker = null
+          return
+        }
+        this.processStatus = this.status.CHANGED
+        this.testInside(event.latlng.lat, event.latlng.lng)
+        this.unwMarker = event.latlng
+        this.$nextTick(() => {
+          this.$refs.unwmarker.mapObject.openPopup()
+       }) 
+       // this.$refs.unwmarker.mapObject.openPopup()
+        var evt = new CustomEvent('unwPointChange', {detail: {value: "open", lat: event.latlng.lat, lng: event.latlng.lng}})
+        document.dispatchEvent(evt)
+    },
     initLeafletDraw () {
        this.drawnBbox = this.$refs.bbox.mapObject
         // this.mapObject.addLayer(this.drawnBbox)
@@ -160,7 +193,7 @@ export default {
             }
          //  e.layer.bindPopup('Zone de sélection')
           var event = new CustomEvent('fmt:selectAreaChange', {detail: bbox})
-          Usgs.setParams({bbox: bbox})
+          // Usgs.setParams({bbox: bbox})
           document.dispatchEvent(event)
           var event2 = new CustomEvent('bboxChange', {detail: {
             minlat: bounds.getSouth(),
@@ -250,6 +283,9 @@ export default {
         })
         // this.getQuota()
 
+    },
+    layerGroupChange () {
+      
     }
   }
 }
