@@ -24,7 +24,7 @@
      :title="displayedImages.length > 0 ? $t('top_images') : $t('bottom_page')"></div>
     
     <!-- Les messages à afficher -->
-    <gdm-messages></gdm-messages>
+    <!-- <gdm-messages></gdm-messages> -->
     
     <!-- LE CONTENU -->
     <div id="content">
